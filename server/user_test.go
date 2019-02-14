@@ -11,6 +11,7 @@ import (
 
 type journey struct {
 	server *server
+	retrievedUser *pb.UserEntity
 }
 
 var userTemplate = pb.UserEntity{
@@ -37,8 +38,8 @@ var userTemplate = pb.UserEntity{
 	},
 }
 
-func (j *journey) userWithIdDoesNotExist(arg1 int) error {
-	// do nothing here
+func (j *journey) aUserWithIdDoesNotExist(arg1 int) error {
+	// nothing to do here
 	return nil
 }
 
@@ -84,6 +85,55 @@ func (j *journey) theUserWithIdHasToExist(id int32) error {
 	return nil
 }
 
+func (j *journey) aUserWithIdExists(id int32) error {
+	userToPersist := userTemplate
+	userToPersist.Id = id
+
+	if err := j.server.repo.Add(&userToPersist); err != nil {
+		return fmt.Errorf("error saving user: %v", err)
+	}
+
+	return nil
+}
+
+func (j *journey) iGetAUserWithId(id int32) error {
+	request := &pb.GetUserByIdRequest{
+		Id: id,
+	}
+
+	response, err := j.server.GetUserByID(context.Background(), request);
+	if err != nil {
+		return err
+	}
+
+	j.retrievedUser = response.User
+
+	return nil
+
+}
+
+func (j *journey) theUserWithIdHasToBeReturned(id int32) error {
+	expectedUser := userTemplate
+	expectedUser.Id = id
+
+	if j.retrievedUser == nil {
+		return fmt.Errorf(
+			"could not find user with id %d",
+			id,
+		)
+	}
+
+	if !reflect.DeepEqual(expectedUser, *j.retrievedUser) {
+		return fmt.Errorf(
+			"expected user: %+v. Actual: %+v",
+			expectedUser,
+			j.retrievedUser,
+		)
+	}
+
+	return nil
+}
+
 func FeatureContext(s *godog.Suite) {
 	userRepository := persistence.InMemoryUserRepository{}
 	server := newServer(&userRepository)
@@ -93,7 +143,11 @@ func FeatureContext(s *godog.Suite) {
 		server: server,
 	}
 
-	s.Step(`^user with id (\d+) does not exist$`, journey.userWithIdDoesNotExist)
+	s.Step(`^a user with id (\d+) does not exist$`, journey.aUserWithIdDoesNotExist)
 	s.Step(`^I add a user with id (\d+)$`, journey.iAddAUserWithId)
 	s.Step(`^the user with id (\d+) has to exist$`, journey.theUserWithIdHasToExist)
+
+	s.Step(`^a user with id (\d+) exists$`, journey.aUserWithIdExists)
+	s.Step(`^I get a user with id (\d+)$`, journey.iGetAUserWithId)
+	s.Step(`^the user with id (\d+) has to be returned$`, journey.theUserWithIdHasToBeReturned)
 }
