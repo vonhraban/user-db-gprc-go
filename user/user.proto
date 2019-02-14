@@ -5,6 +5,12 @@ package user;
 service User {   
     // Create user
     rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {}
+    // Retrieve a user by id
+    rpc GetUserById (GetUserByIdRequest) returns (GetUserResponse) {}
+}
+
+message Error {
+    string message = 1;
 }
 
 message UserEntity {
@@ -39,4 +45,13 @@ message CreateUserRequest {
 message CreateUserResponse {
     int32 id = 1;
     bool success = 2;
+}
+
+message GetUserByIdRequest {
+    int32 id = 1;
+}
+
+message GetUserResponse {
+    UserEntity user = 1;
+    Error error = 2;
 }

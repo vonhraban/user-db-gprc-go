@@ -14,13 +14,29 @@ const (
 )
 
 // createCustomer calls the RPC method CreateCustomer of CustomerServer
-func createUser(client pb.UserClient, customerRequest *pb.CreateUserRequest) {
-	resp, err := client.CreateUser(context.Background(), customerRequest)
+func createUser(client pb.UserClient, request *pb.CreateUserRequest) {
+	response, err := client.CreateUser(context.Background(), request)
 	if err != nil {
 		log.Fatalf("Could not create user: %v", err)
 	}
-	if resp.Success {
-		log.Printf("A new user has been added with id: %d", resp.Id)
+
+	if response.Success {
+		log.Printf("A new user has been added with id: %d", response.Id)
+	}
+}
+
+func getUserById(client pb.UserClient, request *pb.GetUserByIdRequest) {
+	response, err := client.GetUserById(context.Background(), request)
+	if err != nil {
+		log.Fatalf("An error has occured: %v", err)
+	}
+
+	if response.Error != nil {
+		log.Printf("Server returned an error: %v", response.Error)
+	}
+
+	if response.User != nil {
+		log.Printf("Fetched user: %v", response.User)
 	}
 }
 
@@ -71,4 +87,14 @@ func main() {
 
 	// Create a new customer
 	createUser(client, user)
+
+	getUserByIdRequest := &pb.GetUserByIdRequest{
+		Id: 4344343,
+	}
+	getUserById(client, getUserByIdRequest)
+
+	getUserByIdRequest = &pb.GetUserByIdRequest{
+		Id: 43443,
+	}
+	getUserById(client, getUserByIdRequest)
 }
