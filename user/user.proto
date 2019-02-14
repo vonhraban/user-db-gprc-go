@@ -1,0 +1,42 @@
+syntax = "proto3";
+package user;
+
+
+service User {   
+    // Create user
+    rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {}
+}
+
+message UserEntity {
+    int32 id = 1; 
+    string name = 2;
+
+    message Email {
+        string address = 1;
+        bool isPrimary = 2; 
+    }
+
+    repeated Email emails = 3;
+
+    message Phone {
+        string number = 1;
+
+        enum PhoneType {
+            MOBILE = 0;
+            LANDLINE = 1;
+        }
+
+        PhoneType type = 2;
+    }
+
+    repeated Phone phone_numbers = 4;
+}
+
+message CreateUserRequest {
+    UserEntity user = 1;
+}
+
+message CreateUserResponse {
+    int32 id = 1;
+    bool success = 2;
+}
