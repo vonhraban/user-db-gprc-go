@@ -22,7 +22,12 @@ type server struct {
 
 func (s server) CreateUser(ctx context.Context, userRequest *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
 	user := userRequest.GetUser()
+	log.Printf("Saving new user: %+v", user)
+
 	s.savedUsers = append(s.savedUsers, user)
+
+	log.Print("Saved")
+
 
 	return &pb.CreateUserResponse{Id: user.Id, Success: true}, nil
 }
