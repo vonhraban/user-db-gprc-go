@@ -6,7 +6,7 @@ service User {
     // Create user
     rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {}
     // Retrieve a user by id
-    rpc GetUserById (GetUserByIdRequest) returns (GetUserResponse) {}
+    rpc GetUserByID (GetUserByIdRequest) returns (GetUserResponse) {}
 }
 
 message Error {
